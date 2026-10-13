@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Screensaver-2</title>
+<title>Screen</title>
 <style>
   * { box-sizing: border-box; }
   html, body {
@@ -13,7 +13,7 @@
     background: #000;
     cursor: none;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                 "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+                 "PingFang Screensaver", "Microsoft YaHei", "Helvetica Neue", sans-serif;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
@@ -143,6 +143,13 @@
 </div>
 
 <script>
+/* =========================================================
+   ★★★ 自动轮播配置（改这里就够了） ★★★
+   ========================================================= */
+const AUTO_MINUTES = 5;                        // 每隔多少分钟自动切换下一个场景
+const AUTO_MS = AUTO_MINUTES * 60 * 1000;      // 自动换算成毫秒，无需改动
+/* ========================================================= */
+
 /* =========================================================
    公共工具
    ========================================================= */
@@ -2916,7 +2923,7 @@ function createDesert(canvas) {
 })();
 
 /* =========================================================
-   主控：模式管理 + UI
+   主控：模式管理 + UI + 自动轮播
    ========================================================= */
 (function main() {
   'use strict';
@@ -2979,9 +2986,35 @@ function createDesert(canvas) {
     }
   }
 
+  /* ---------------- 自动轮播：每 AUTO_MINUTES 分钟按序切换 ---------------- */
+  let autoNext = Date.now() + AUTO_MS;
+
+  function resetAutoTimer() {
+    autoNext = Date.now() + AUTO_MS;
+  }
+
+  function autoTick() {
+    const now = Date.now();
+    if (now < autoNext) return;
+    const i = ORDER.indexOf(current);
+    applyMode(ORDER[(i + 1) % ORDER.length]);
+    // 以“实际切换时间”为基准重新计时，避免长时间后台导致连续跳帧
+    autoNext = now + AUTO_MS;
+  }
+
+  // 每秒检查一次，比 setInterval(AUTO_MS) 更稳（后台节流后也不会漏切）
+  setInterval(autoTick, 1000);
+
+  // 页面重新可见时立即校正一次（后台可能被节流）
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) autoTick();
+  });
+  /* --------------------------------------------------------------------- */
+
   buttons.forEach(function (btn) {
     btn.addEventListener('click', function () {
       applyMode(btn.dataset.mode);
+      resetAutoTimer();   // 手动切换后，重新开始计时
       wakeUI();
       btn.blur();
     });
@@ -2992,15 +3025,21 @@ function createDesert(canvas) {
       e.preventDefault();
       const i = ORDER.indexOf(current);
       applyMode(ORDER[(i + 1) % ORDER.length]);
+      resetAutoTimer();
       wakeUI();
       return;
     }
     const n = parseInt(e.key, 10);
     if (n >= 1 && n <= ORDER.length) {
       applyMode(ORDER[n - 1]);
+      resetAutoTimer();
       wakeUI();
     }
-    if (e.key === '0') { applyMode(ORDER[9]); wakeUI(); }
+    if (e.key === '0') {
+      applyMode(ORDER[9]);
+      resetAutoTimer();
+      wakeUI();
+    }
   });
 
   function pointerMove(x, y) {
