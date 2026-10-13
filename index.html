@@ -14,7 +14,6 @@
     }
     canvas { position: fixed; inset: 0; display: block; }
 
-    /* ---------- 时钟（所有模式共用） ---------- */
     #clock {
         position: fixed;
         top: 50%; left: 50%;
@@ -46,7 +45,6 @@
         50%      { opacity: 1; }
     }
 
-    /* ---------- 极光中心微光 ---------- */
     #core {
         position: fixed;
         top: 50%; left: 50%;
@@ -63,7 +61,6 @@
     }
     @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-    /* ---------- 切换按钮（自动隐藏） ---------- */
     #switcher {
         position: fixed;
         right: 28px; bottom: 24px;
@@ -101,11 +98,10 @@
     }
     #switcher .sep { opacity: 0.3; }
 
-    /* ---------- “其它”按钮（跳转页面2） ---------- */
     #otherBtn {
         position: fixed;
         right: 28px;
-        bottom: 78px;               /* 正好叠在 switcher 上方 */
+        bottom: 78px;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -131,7 +127,6 @@
         border-color: rgba(255, 255, 255, 0.4);
         color: #fff;
     }
-
 </style>
 </head>
 <body>
@@ -163,8 +158,7 @@
     <span class="dot" data-mode="bubbles"></span>气泡
 </div>
 
-<!-- 跳转到页面2：同域、新标签页打开 -->
-<a id="otherBtn" href="页面2.html" target="_blank" rel="noopener">其它</a>
+<a id="otherBtn" href="page2.html" target="_blank" rel="noopener">其它</a>
 
 <script>
 (function () {
@@ -192,7 +186,7 @@
     let mode = 'starfield';
     let W = 0, H = 0;
 
-    /* ================= 星空模式 ================= */
+    /* ================= 星空 ================= */
     let stars = [], meteors = [];
     const DEPTH = 3;
 
@@ -280,7 +274,7 @@
         }
     }
 
-    /* ================= 极光模式 ================= */
+    /* ================= 极光 ================= */
     const wavesA = [];
     for (let i = 0; i < 5; i++) {
         wavesA.push({
@@ -380,7 +374,7 @@
         actx.globalCompositeOperation = 'source-over';
     }
 
-    /* ================= 粒子星座模式 ================= */
+    /* ================= 粒子星座 ================= */
     let nodes = [];
 
     function initNetwork() {
@@ -439,7 +433,7 @@
         }
     }
 
-    /* ================= 流光波浪模式 ================= */
+    /* ================= 流光 ================= */
     const ribbons = [];
     for (let i = 0; i < 6; i++) {
         ribbons.push({
@@ -522,7 +516,7 @@
         wctx.globalCompositeOperation = 'source-over';
     }
 
-    /* ================= 飘雪模式 ================= */
+    /* ================= 飘雪 ================= */
     let flakes = [];
 
     function initSnow() {
@@ -576,7 +570,7 @@
         }
     }
 
-    /* ================= 气泡模式 ================= */
+    /* ================= 气泡 ================= */
     let bubbles = [];
 
     function initBubbles() {
@@ -634,13 +628,12 @@
         }
     }
 
-    /* ================= 时钟（网络时间校准） ================= */
+    /* ================= 时钟 ================= */
     const timeEl = document.getElementById('time');
     const dateEl = document.getElementById('date');
     const week = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
     let timeOffset = 0;
-    let netTimeOk = false;
 
     async function syncNetworkTime() {
         const apis = [
@@ -663,7 +656,6 @@
                 const netMs = await api();
                 const rtt = Date.now() - start;
                 timeOffset = netMs + rtt / 2 - Date.now();
-                netTimeOk = true;
                 return;
             } catch (e) { }
         }
@@ -686,7 +678,7 @@
     syncNetworkTime();
     setInterval(syncNetworkTime, 10 * 60 * 1000);
 
-    /* ================= 模式切换（含 5 分钟自动轮换） ================= */
+    /* ================= 模式切换 ================= */
     function applyMode() {
         for (const m of MODES) {
             canvases[m].style.display = (m === mode) ? 'block' : 'none';
@@ -719,7 +711,6 @@
         }
     });
 
-    /* ---------- “其它”按钮与 switcher 一起出现/淡出 ---------- */
     const otherBtn = document.getElementById('otherBtn');
 
     let hideTimer = null;
