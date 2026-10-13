@@ -3,8 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Screen</title>
+<title>Screensaver-2</title>
 <style>
+  /* ============ 阿里普惠体 ============
+     优先使用系统中已安装的阿里普惠体；
+     若未安装，把字体文件放到 index.html 同级的 fonts/ 目录即可生效：
+       fonts/AlibabaPuHuiTi-3-55-Regular.woff2   (Regular / 400)
+       fonts/AlibabaPuHuiTi-3-65-Medium.woff2    (Medium / 500)
+     （也可直接换成你自己的 CDN 地址）
+  ===================================== */
+  @font-face {
+    font-family: "Alibaba PuHuiTi";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local("Alibaba PuHuiTi 3.0 55 Regular"),
+         local("AlibabaPuHuiTi-3-55-Regular"),
+         local("Alibaba PuHuiTi 3.0"),
+         local("Alibaba PuHuiTi 2.0"),
+         local("Alibaba PuHuiTi"),
+         url("fonts/AlibabaPuHuiTi-3-55-Regular.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Alibaba PuHuiTi";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: local("Alibaba PuHuiTi 3.0 65 Medium"),
+         local("AlibabaPuHuiTi-3-65-Medium"),
+         local("Alibaba PuHuiTi 3.0 Medium"),
+         local("Alibaba PuHuiTi 2.0 Medium"),
+         local("Alibaba PuHuiTi Medium"),
+         url("fonts/AlibabaPuHuiTi-3-65-Medium.woff2") format("woff2");
+  }
+
   * { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0;
@@ -12,8 +44,10 @@
     overflow: hidden;
     background: #000;
     cursor: none;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                 "PingFang Screensaver", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    /* 其余元素：阿里普惠体 Regular */
+    font-family: "Alibaba PuHuiTi", "PingFang SC", "Microsoft YaHei",
+                 "Helvetica Neue", Arial, sans-serif;
+    font-weight: 400;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
@@ -36,8 +70,10 @@
     user-select: none;
   }
   .clock .time {
+    /* 标题：阿里普惠体 Medium */
+    font-family: "Alibaba PuHuiTi", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-weight: 500;
     font-size: clamp(48px, 11vw, 148px);
-    font-weight: 200;
     letter-spacing: 0.05em;
     line-height: 1;
     color: rgba(255, 255, 255, 0.93);
@@ -50,7 +86,7 @@
   .clock .date {
     margin-top: 16px;
     font-size: clamp(11px, 1.5vw, 16px);
-    font-weight: 300;
+    font-weight: 400;
     letter-spacing: 0.38em;
     text-indent: 0.38em;
     color: rgba(255, 255, 255, 0.40);
@@ -1366,7 +1402,6 @@ function createSnowForest(canvas) {
   let stars = [];
   let snow = [];
 
-  /* —— 每棵树随机生成：树型、层数、倾斜、颜色偏移 —— */
   function buildTrees() {
     layerTrees = [];
     const rng = mulberry32(20261013);
@@ -1381,15 +1416,13 @@ function createSnowForest(canvas) {
         const h = L.hMin + rng() * (L.hMax - L.hMin);
         const w = h * (0.26 + rng() * 0.14);
 
-        /* 树型：0 松树 / 1 云杉 / 2 冷杉 / 3 雪松 */
         const type = (rng() * 4) | 0;
 
-        /* 不同树型的层数不同 */
         let tiers;
-        if (type === 0) tiers = 4 + ((rng() * 2) | 0);      /* 松树：4~5 层 */
-        else if (type === 1) tiers = 3 + ((rng() * 2) | 0); /* 云杉：3~4 层 */
-        else if (type === 2) tiers = 5 + ((rng() * 2) | 0); /* 冷杉：5~6 层 */
-        else tiers = 3;                                      /* 雪松：3 层 */
+        if (type === 0) tiers = 4 + ((rng() * 2) | 0);
+        else if (type === 1) tiers = 3 + ((rng() * 2) | 0);
+        else if (type === 2) tiers = 5 + ((rng() * 2) | 0);
+        else tiers = 3;
 
         trees.push({
           x: x,
@@ -1399,8 +1432,8 @@ function createSnowForest(canvas) {
           snow: layerSnow * (0.7 + rng() * 0.6),
           type: type,
           tiers: tiers,
-          lean: (rng() - 0.5) * 0.14,          /* 轻微倾斜 */
-          colorShift: (rng() - 0.5) * 0.22     /* 颜色微变 */
+          lean: (rng() - 0.5) * 0.14,
+          colorShift: (rng() - 0.5) * 0.22
         });
       }
       layerTrees.push(trees);
@@ -1450,18 +1483,15 @@ function createSnowForest(canvas) {
     ctx.fillRect(0, 0, W, H);
   }
 
-  /* —— 四种树型的绘制逻辑 —— */
   function drawPine(x, baseY, h, w, color, snowAmount, tree) {
     const type = tree.type;
     const tiers = tree.tiers;
     const leanX = tree.lean * h;
 
-    /* 树的中轴：从 (x, baseY) 到 (x+leanX, baseY-h)，倾斜的树干 */
     function axisX(y) {
       return x + leanX * ((baseY - y) / h);
     }
 
-    /* 树干比例按树型变化 */
     const trunkRatio = type === 0 ? 0.13 : (type === 2 ? 0.07 : 0.10);
     const trunkH = Math.max(2, h * trunkRatio);
     const trunkW = Math.max(1, w * (type === 2 ? 0.15 : 0.12));
@@ -1469,7 +1499,6 @@ function createSnowForest(canvas) {
     const foliageBase = baseY - trunkH;
     const foliageH = h - trunkH;
 
-    /* —— 树干 —— */
     const tx0 = axisX(baseY);
     const tx1 = axisX(foliageBase);
     ctx.fillStyle = 'rgba(10,14,24,0.95)';
@@ -1481,13 +1510,11 @@ function createSnowForest(canvas) {
     ctx.closePath();
     ctx.fill();
 
-    /* —— 枝叶 —— */
     for (let t = 0; t < tiers; t++) {
       const tRel = tiers > 1 ? t / (tiers - 1) : 0;
       let botY, topY, th, halfW, sag;
 
       if (type === 0) {
-        /* 松树：高瘦，层间距大，枝尖明显下垂 */
         const tierH = foliageH / (tiers + 0.4);
         botY = foliageBase - tierH * (0.55 + t * 0.95);
         topY = botY - tierH * 1.55;
@@ -1495,7 +1522,6 @@ function createSnowForest(canvas) {
         halfW = w * 0.42 * (1 - tRel * 0.52);
         sag = th * 0.22;
       } else if (type === 1) {
-        /* 云杉：宽底，层分离明显，经典圣诞树 */
         const tierH = foliageH / tiers;
         botY = foliageBase - tierH * t * 0.82;
         topY = foliageBase - tierH * (t + 1.20);
@@ -1503,7 +1529,6 @@ function createSnowForest(canvas) {
         halfW = w * 0.62 * (1 - tRel * 0.70);
         sag = th * 0.10;
       } else if (type === 2) {
-        /* 冷杉：密实重叠，偏窄，毛茸茸 */
         const tierH = foliageH / (tiers * 0.75);
         botY = foliageBase - tierH * t * 0.82;
         topY = foliageBase - tierH * (t + 1.35);
@@ -1511,7 +1536,6 @@ function createSnowForest(canvas) {
         halfW = w * 0.50 * (1 - tRel * 0.52);
         sag = th * 0.06;
       } else {
-        /* 雪松：矮宽，大冠幅，层少 */
         const tierH = foliageH / tiers;
         botY = foliageBase - tierH * t * 0.78;
         topY = foliageBase - tierH * (t + 1.05);
@@ -1523,7 +1547,6 @@ function createSnowForest(canvas) {
       const yMid = (botY + topY) * 0.5;
       const cx = axisX(yMid);
 
-      /* 枝叶形状 */
       ctx.fillStyle = color;
       ctx.beginPath();
       ctx.moveTo(cx, topY);
@@ -1534,7 +1557,6 @@ function createSnowForest(canvas) {
       ctx.closePath();
       ctx.fill();
 
-      /* 枝头积雪 */
       if (snowAmount > 0.05) {
         ctx.strokeStyle = 'rgba(255,255,255,' + (snowAmount * 0.6) + ')';
         ctx.lineWidth = Math.max(0.7, w * 0.05);
@@ -1625,7 +1647,6 @@ function createSnowForest(canvas) {
 
     ctx.globalCompositeOperation = 'source-over';
 
-    /* —— 绘制树林（每棵树有自己的颜色微差） —— */
     for (let li = 0; li < layerTrees.length; li++) {
       const trees = layerTrees[li];
       const L = LAYERS[li];
@@ -2998,14 +3019,11 @@ function createDesert(canvas) {
     if (now < autoNext) return;
     const i = ORDER.indexOf(current);
     applyMode(ORDER[(i + 1) % ORDER.length]);
-    // 以“实际切换时间”为基准重新计时，避免长时间后台导致连续跳帧
     autoNext = now + AUTO_MS;
   }
 
-  // 每秒检查一次，比 setInterval(AUTO_MS) 更稳（后台节流后也不会漏切）
   setInterval(autoTick, 1000);
 
-  // 页面重新可见时立即校正一次（后台可能被节流）
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) autoTick();
   });
@@ -3014,7 +3032,7 @@ function createDesert(canvas) {
   buttons.forEach(function (btn) {
     btn.addEventListener('click', function () {
       applyMode(btn.dataset.mode);
-      resetAutoTimer();   // 手动切换后，重新开始计时
+      resetAutoTimer();
       wakeUI();
       btn.blur();
     });
