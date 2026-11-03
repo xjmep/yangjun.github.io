@@ -5,12 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Screensaver-2</title>
 <style>
-  /* ============ 阿里普惠体 ============
-     优先使用系统中已安装的阿里普惠体；
-     若未安装，把字体文件放到 index.html 同级的 fonts/ 目录即可生效：
-       fonts/AlibabaPuHuiTi-3-55-Regular.woff2   (Regular / 400)
-       fonts/AlibabaPuHuiTi-3-65-Medium.woff2    (Medium / 500)
-     （也可直接换成你自己的 CDN 地址）
+  /* ============ 阿里巴巴普惠体 ============
+     优先使用系统中已安装的阿里巴巴普惠体；
+     若未安装，加载同目录 fonts/ 下的字体文件；
+     若本地文件不存在，回退到 jsDelivr CDN。
   ===================================== */
   @font-face {
     font-family: "Alibaba PuHuiTi";
@@ -22,7 +20,8 @@
          local("Alibaba PuHuiTi 3.0"),
          local("Alibaba PuHuiTi 2.0"),
          local("Alibaba PuHuiTi"),
-         url("fonts/AlibabaPuHuiTi-3-55-Regular.woff2") format("woff2");
+         url("fonts/AlibabaPuHuiTi-3-55-Regular.woff2") format("woff2"),
+         url("https://cdn.jsdelivr.net/npm/@fontpkg/alibaba-puhuiti-3-0@0.0.0/AlibabaPuHuiTi-3-55-Regular.woff2") format("woff2");
   }
   @font-face {
     font-family: "Alibaba PuHuiTi";
@@ -34,7 +33,8 @@
          local("Alibaba PuHuiTi 3.0 Medium"),
          local("Alibaba PuHuiTi 2.0 Medium"),
          local("Alibaba PuHuiTi Medium"),
-         url("fonts/AlibabaPuHuiTi-3-65-Medium.woff2") format("woff2");
+         url("fonts/AlibabaPuHuiTi-3-65-Medium.woff2") format("woff2"),
+         url("https://cdn.jsdelivr.net/npm/@fontpkg/alibaba-puhuiti-3-0@0.0.0/AlibabaPuHuiTi-3-65-Medium.woff2") format("woff2");
   }
 
   * { box-sizing: border-box; }
@@ -44,9 +44,8 @@
     overflow: hidden;
     background: #000;
     cursor: none;
-    /* 其余元素：阿里普惠体 Regular */
-    font-family: "Alibaba PuHuiTi", "PingFang SC", "Microsoft YaHei",
-                 "Helvetica Neue", Arial, sans-serif;
+    /* 仅使用：阿里巴巴普惠体 → 思源黑体 → 思源宋体 → 通用无衬线 */
+    font-family: "Alibaba PuHuiTi", "Source Han Sans SC", "Source Han Sans CN", "Source Han Serif SC", "Source Han Serif CN", sans-serif;
     font-weight: 400;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -70,8 +69,8 @@
     user-select: none;
   }
   .clock .time {
-    /* 标题：阿里普惠体 Medium */
-    font-family: "Alibaba PuHuiTi", "PingFang SC", "Microsoft YaHei", sans-serif;
+    /* 标题：阿里巴巴普惠体 Medium */
+    font-family: "Alibaba PuHuiTi", "Source Han Sans SC", "Source Han Sans CN", "Source Han Serif SC", "Source Han Serif CN", sans-serif;
     font-weight: 500;
     font-size: clamp(48px, 11vw, 148px);
     letter-spacing: 0.05em;

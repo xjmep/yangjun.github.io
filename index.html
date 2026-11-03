@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Screensaver</title>
 <style>
-    /* ============ 阿里普惠体 ============
-       优先使用系统中已安装的阿里普惠体；
+    /* ============ 阿里巴巴普惠体 ============
+       优先使用系统已安装的阿里巴巴普惠体；
        若未安装，把字体文件放到 index.html 同级的 fonts/ 目录即可生效：
          fonts/AlibabaPuHuiTi-3-55-Regular.woff2   (Regular / 400)
          fonts/AlibabaPuHuiTi-3-65-Medium.woff2    (Medium / 500)
@@ -42,9 +42,7 @@
         width: 100%; height: 100%;
         background: #000000;
         overflow: hidden;
-        /* 其余元素：阿里普惠体 Regular */
-        font-family: "Alibaba PuHuiTi", "PingFang SC", "Microsoft YaHei",
-                     "Helvetica Neue", Arial, sans-serif;
+        font-family: "Alibaba PuHuiTi";
         font-weight: 400;
     }
     canvas { position: fixed; inset: 0; display: block; }
@@ -60,8 +58,7 @@
         z-index: 5;
     }
     #time {
-        /* 标题：阿里普惠体 Medium */
-        font-family: "Alibaba PuHuiTi", "PingFang SC", "Microsoft YaHei", sans-serif;
+        font-family: "Alibaba PuHuiTi";
         font-weight: 500;
         font-size: clamp(64px, 14vw, 180px);
         letter-spacing: 0.06em;
@@ -110,6 +107,7 @@
         background: rgba(255, 255, 255, 0.04);
         backdrop-filter: blur(8px);
         color: rgba(255, 255, 255, 0.7);
+        font-family: "Alibaba PuHuiTi";
         font-size: 13px;
         letter-spacing: 0.12em;
         cursor: pointer;
@@ -149,6 +147,7 @@
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         color: rgba(255, 255, 255, 0.7);
+        font-family: "Alibaba PuHuiTi";
         font-size: 13px;
         letter-spacing: 0.12em;
         text-decoration: none;
