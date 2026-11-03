@@ -2,7 +2,14 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<meta name="x5-orientation" content="auto">
+<meta name="screen-orientation" content="auto">
 <title>Screensaver</title>
 <style>
     /* ============ 阿里巴巴普惠体 ============
@@ -37,42 +44,73 @@
              url("fonts/AlibabaPuHuiTi-3-65-Medium.woff2") format("woff2");
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+
     html, body {
-        width: 100%; height: 100%;
+        width: 100%;
+        height: 100%;
         background: #000000;
         overflow: hidden;
-        font-family: "Alibaba PuHuiTi";
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        overscroll-behavior: none;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        font-family: "Alibaba PuHuiTi", -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
         font-weight: 400;
     }
-    canvas { position: fixed; inset: 0; display: block; }
 
+    canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        will-change: transform;
+    }
+
+    /* ================= 时钟 ================= */
     #clock {
         position: fixed;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
+        left: 0;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
         text-align: center;
         pointer-events: none;
         user-select: none;
+        -webkit-user-select: none;
         animation: breathe 6s ease-in-out infinite;
         z-index: 5;
+        padding: 0 16px;
     }
     #time {
-        font-family: "Alibaba PuHuiTi";
+        font-family: "Alibaba PuHuiTi", -apple-system, "PingFang SC", sans-serif;
         font-weight: 500;
-        font-size: clamp(64px, 14vw, 180px);
+        font-size: clamp(52px, 16vw, 180px);
+        line-height: 1.05;
         letter-spacing: 0.06em;
+        text-indent: 0.06em;
         color: rgba(255, 255, 255, 0.85);
         text-shadow: 0 0 30px rgba(120, 180, 255, 0.30);
         font-variant-numeric: tabular-nums;
+        white-space: nowrap;
     }
     #date {
-        margin-top: 12px;
-        font-size: clamp(14px, 2.2vw, 26px);
+        margin-top: 10px;
+        font-size: clamp(12px, 2.2vw, 26px);
         font-weight: 400;
         letter-spacing: 0.5em;
         text-indent: 0.5em;
         color: rgba(255, 255, 255, 0.4);
+        white-space: nowrap;
     }
     @keyframes breathe {
         0%, 100% { opacity: 0.55; }
@@ -92,76 +130,137 @@
         animation: spin 40s linear infinite;
         pointer-events: none;
         display: none;
+        z-index: 1;
     }
     @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
+    /* ================= 模式切换 ================= */
     #switcher {
         position: fixed;
-        right: 28px; bottom: 24px;
+        right: 28px;
+        bottom: calc(24px + env(safe-area-inset-bottom, 0px));
         display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
         align-items: center;
-        gap: 8px;
+        gap: 8px 14px;
         padding: 10px 16px;
         border: 1px solid rgba(255, 255, 255, 0.18);
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.04);
+        -webkit-backdrop-filter: blur(8px);
         backdrop-filter: blur(8px);
         color: rgba(255, 255, 255, 0.7);
-        font-family: "Alibaba PuHuiTi";
+        font-family: "Alibaba PuHuiTi", -apple-system, "PingFang SC", sans-serif;
         font-size: 13px;
-        letter-spacing: 0.12em;
+        letter-spacing: 0.08em;
         cursor: pointer;
         opacity: 0;
         transition: opacity 0.6s ease, background 0.3s ease, border-color 0.3s ease;
         z-index: 10;
-        white-space: nowrap;
+        max-width: calc(100vw - 56px);
+        -webkit-tap-highlight-color: transparent;
     }
     #switcher.visible { opacity: 1; }
     #switcher:hover {
         background: rgba(255, 255, 255, 0.10);
         border-color: rgba(255, 255, 255, 0.4);
     }
+
+    #switcher .item {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 1px 0;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+    #switcher .item.active { color: rgba(255, 255, 255, 0.96); }
+    #switcher .item.other { color: rgba(255, 255, 255, 0.55); }
+    #switcher .item.other:hover { color: #ffffff; }
+
     #switcher .dot {
-        width: 8px; height: 8px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.25);
         transition: background 0.4s ease, box-shadow 0.4s ease;
+        flex: 0 0 auto;
     }
-    #switcher .dot.active {
+    #switcher .item.active .dot {
         background: #7ec8ff;
         box-shadow: 0 0 10px rgba(126, 200, 255, 0.8);
     }
-    #switcher .sep { opacity: 0.3; }
-
-    #otherBtn {
-        position: fixed;
-        right: 28px;
-        bottom: 78px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 18px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.04);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        color: rgba(255, 255, 255, 0.7);
-        font-family: "Alibaba PuHuiTi";
-        font-size: 13px;
-        letter-spacing: 0.12em;
-        text-decoration: none;
-        cursor: pointer;
-        opacity: 0;
-        transition: opacity 0.6s ease, background 0.3s ease, border-color 0.3s ease;
-        z-index: 10;
-        white-space: nowrap;
+    #switcher .item.other .dot {
+        background: rgba(255, 255, 255, 0.35);
+        box-shadow: none;
     }
-    #otherBtn.visible { opacity: 1; }
-    #otherBtn:hover {
-        background: rgba(255, 255, 255, 0.10);
-        border-color: rgba(255, 255, 255, 0.4);
-        color: #fff;
+
+    /* 不支持毛玻璃时的降级 */
+    @supports not ((-webkit-backdrop-filter: blur(8px)) or (backdrop-filter: blur(8px))) {
+        #switcher {
+            background: rgba(18, 22, 30, 0.82);
+        }
+    }
+
+    /* ================= 移动端 / 窄屏：4 列网格，两排 ================= */
+    @media (max-width: 900px) {
+        #switcher {
+            left: 12px;
+            right: 12px;
+            bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            justify-items: center;
+            align-items: center;
+            gap: 8px 2px;
+            padding: 10px 6px;
+            border-radius: 18px;
+            font-size: 11.5px;
+            letter-spacing: 0.04em;
+            max-width: none;
+        }
+        #switcher .item {
+            gap: 4px;
+            font-size: 11.5px;
+        }
+        #switcher .dot {
+            width: 6px;
+            height: 6px;
+        }
+
+        #date {
+            letter-spacing: 0.28em;
+            text-indent: 0.28em;
+            margin-top: 8px;
+        }
+        #clock { padding: 0 12px; }
+        #time { letter-spacing: 0.04em; text-indent: 0.04em; }
+    }
+
+    /* 横屏手机：进一步压缩 */
+    @media (max-height: 460px) and (orientation: landscape) {
+        #time { font-size: clamp(40px, 11vh, 100px); }
+        #date { font-size: 12px; margin-top: 4px; }
+        #switcher {
+            gap: 5px 2px;
+            padding: 7px 4px;
+            font-size: 10.5px;
+            border-radius: 14px;
+        }
+        #switcher .item { font-size: 10.5px; gap: 3px; }
+        #switcher .dot { width: 5px; height: 5px; }
+    }
+
+    /* 超小屏 */
+    @media (max-width: 340px) {
+        #switcher { font-size: 10.5px; padding: 8px 4px; gap: 7px 2px; }
+        #switcher .item { font-size: 10.5px; gap: 3px; }
+        #date { font-size: 11px; }
     }
 </style>
 </head>
@@ -173,6 +272,7 @@
 <canvas id="wavesCanvas"></canvas>
 <canvas id="snowCanvas"></canvas>
 <canvas id="bubblesCanvas"></canvas>
+<canvas id="firefliesCanvas"></canvas>
 <div id="core"></div>
 
 <div id="clock">
@@ -181,56 +281,63 @@
 </div>
 
 <div id="switcher">
-    <span class="dot active" data-mode="starfield"></span>星空
-    <span class="sep">/</span>
-    <span class="dot" data-mode="aurora"></span>极光
-    <span class="sep">/</span>
-    <span class="dot" data-mode="network"></span>粒子
-    <span class="sep">/</span>
-    <span class="dot" data-mode="waves"></span>流光
-    <span class="sep">/</span>
-    <span class="dot" data-mode="snow"></span>飘雪
-    <span class="sep">/</span>
-    <span class="dot" data-mode="bubbles"></span>气泡
+    <div class="item active" data-mode="starfield"><span class="dot"></span>星空</div>
+    <div class="item" data-mode="aurora"><span class="dot"></span>极光</div>
+    <div class="item" data-mode="network"><span class="dot"></span>粒子</div>
+    <div class="item" data-mode="waves"><span class="dot"></span>流光</div>
+    <div class="item" data-mode="snow"><span class="dot"></span>飘雪</div>
+    <div class="item" data-mode="bubbles"><span class="dot"></span>气泡</div>
+    <div class="item" data-mode="fireflies"><span class="dot"></span>萤火</div>
+    <a class="item other" href="page2.html" target="_blank" rel="noopener"><span class="dot"></span>其它</a>
 </div>
-
-<a id="otherBtn" href="page2.html" target="_blank" rel="noopener">其它</a>
 
 <script>
 (function () {
-    const canvases = {
+    'use strict';
+
+    /* ================================================================
+       基础环境
+    ================================================================ */
+    var canvases = {
         starfield: document.getElementById('starsCanvas'),
-        aurora: document.getElementById('auroraCanvas'),
-        network: document.getElementById('networkCanvas'),
-        waves: document.getElementById('wavesCanvas'),
-        snow: document.getElementById('snowCanvas'),
-        bubbles: document.getElementById('bubblesCanvas')
+        aurora:    document.getElementById('auroraCanvas'),
+        network:   document.getElementById('networkCanvas'),
+        waves:     document.getElementById('wavesCanvas'),
+        snow:      document.getElementById('snowCanvas'),
+        bubbles:   document.getElementById('bubblesCanvas'),
+        fireflies: document.getElementById('firefliesCanvas')
     };
-    const sctx = canvases.starfield.getContext('2d');
-    const actx = canvases.aurora.getContext('2d');
-    const nctx = canvases.network.getContext('2d');
-    const wctx = canvases.waves.getContext('2d');
-    const snctx = canvases.snow.getContext('2d');
-    const bctx = canvases.bubbles.getContext('2d');
 
-    const clockEl = document.getElementById('clock');
-    const coreEl = document.getElementById('core');
-    const switcher = document.getElementById('switcher');
-    const dots = switcher.querySelectorAll('.dot');
+    var sctx  = canvases.starfield.getContext('2d');
+    var actx  = canvases.aurora.getContext('2d');
+    var nctx  = canvases.network.getContext('2d');
+    var wctx  = canvases.waves.getContext('2d');
+    var snctx = canvases.snow.getContext('2d');
+    var bctx  = canvases.bubbles.getContext('2d');
+    var fctx  = canvases.fireflies.getContext('2d');
 
-    const MODES = ['starfield', 'aurora', 'network', 'waves', 'snow', 'bubbles'];
-    let mode = 'starfield';
-    let W = 0, H = 0;
+    var clockEl  = document.getElementById('clock');
+    var coreEl   = document.getElementById('core');
+    var switcher = document.getElementById('switcher');
+    var items    = switcher.querySelectorAll('.item[data-mode]');
+    var otherItem = switcher.querySelector('.item.other');
 
-    /* ================= 星空 ================= */
-    let stars = [], meteors = [];
-    const DEPTH = 3;
+    var MODES = ['starfield', 'aurora', 'network', 'waves', 'snow', 'bubbles', 'fireflies'];
+    var mode = 'starfield';
+
+    var W = 0, H = 0, DPR = 1;
+
+    /* ================================================================
+       星空
+    ================================================================ */
+    var stars = [], meteors = [];
+    var DEPTH = 3;
 
     function initStars() {
         stars = [];
-        const count = Math.floor((W * H) / 5200);
-        for (let i = 0; i < count; i++) {
-            const layer = Math.floor(Math.random() * DEPTH) + 1;
+        var count = Math.min(340, Math.floor((W * H) / 5200));
+        for (var i = 0; i < count; i++) {
+            var layer = Math.floor(Math.random() * DEPTH) + 1;
             stars.push({
                 x: Math.random() * W,
                 y: Math.random() * H,
@@ -246,54 +353,57 @@
     }
 
     function spawnMeteor() {
-        if (mode !== 'starfield') { setTimeout(spawnMeteor, 3000); return; }
-        const fromLeft = Math.random() < 0.5;
-        meteors.push({
-            x: fromLeft ? Math.random() * W * 0.4 : W * (0.6 + Math.random() * 0.4),
-            y: Math.random() * H * 0.35,
-            len: 120 + Math.random() * 180,
-            angle: Math.PI / 4 + (Math.random() - 0.5) * 0.4,
-            speed: 9 + Math.random() * 7,
-            life: 1
-        });
+        if (mode === 'starfield') {
+            var fromLeft = Math.random() < 0.5;
+            meteors.push({
+                x: fromLeft ? Math.random() * W * 0.4 : W * (0.6 + Math.random() * 0.4),
+                y: Math.random() * H * 0.35,
+                len: 120 + Math.random() * 180,
+                angle: Math.PI / 4 + (Math.random() - 0.5) * 0.4,
+                speed: 9 + Math.random() * 7,
+                life: 1
+            });
+        }
         setTimeout(spawnMeteor, 2500 + Math.random() * 6000);
     }
 
-    function drawStars(t) {
+    function drawStars(t, step) {
         sctx.fillStyle = '#000000';
         sctx.fillRect(0, 0, W, H);
 
-        for (const s of stars) {
-            const twinkle = 0.5 + 0.5 * Math.sin(t * s.speed + s.phase);
-            const alpha = s.baseAlpha * (0.35 + 0.65 * twinkle);
-            s.x += s.vx;
+        for (var i = 0; i < stars.length; i++) {
+            var s = stars[i];
+            var twinkle = 0.5 + 0.5 * Math.sin(t * s.speed + s.phase);
+            var alpha = s.baseAlpha * (0.35 + 0.65 * twinkle);
+            s.x += s.vx * step;
             if (s.x < -4) s.x = W + 4;
 
             sctx.beginPath();
             sctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
             sctx.fillStyle = s.hue !== null
-                ? `hsla(${s.hue}, 90%, 75%, ${alpha})`
-                : `rgba(255, 255, 255, ${alpha})`;
+                ? 'hsla(' + s.hue + ', 90%, 75%, ' + alpha + ')'
+                : 'rgba(255,255,255,' + alpha + ')';
             sctx.fill();
 
             if (s.layer === DEPTH && twinkle > 0.85) {
                 sctx.beginPath();
                 sctx.arc(s.x, s.y, s.size * 3.2, 0, Math.PI * 2);
-                sctx.fillStyle = `rgba(180, 210, 255, ${(twinkle - 0.85) * 0.35})`;
+                sctx.fillStyle = 'rgba(180, 210, 255, ' + ((twinkle - 0.85) * 0.35) + ')';
                 sctx.fill();
             }
         }
 
-        meteors = meteors.filter(m => m.life > 0);
-        for (const m of meteors) {
-            m.x += Math.cos(m.angle) * m.speed;
-            m.y += Math.sin(m.angle) * m.speed;
-            m.life -= 0.008;
+        meteors = meteors.filter(function (m) { return m.life > 0; });
+        for (var j = 0; j < meteors.length; j++) {
+            var m = meteors[j];
+            m.x += Math.cos(m.angle) * m.speed * step;
+            m.y += Math.sin(m.angle) * m.speed * step;
+            m.life -= 0.008 * step;
 
-            const tailX = m.x - Math.cos(m.angle) * m.len;
-            const tailY = m.y - Math.sin(m.angle) * m.len;
-            const grad = sctx.createLinearGradient(m.x, m.y, tailX, tailY);
-            grad.addColorStop(0, `rgba(255,255,255,${0.9 * m.life})`);
+            var tailX = m.x - Math.cos(m.angle) * m.len;
+            var tailY = m.y - Math.sin(m.angle) * m.len;
+            var grad = sctx.createLinearGradient(m.x, m.y, tailX, tailY);
+            grad.addColorStop(0, 'rgba(255,255,255,' + (0.9 * m.life) + ')');
             grad.addColorStop(1, 'rgba(255,255,255,0)');
             sctx.strokeStyle = grad;
             sctx.lineWidth = 1.6;
@@ -305,31 +415,33 @@
 
             sctx.beginPath();
             sctx.arc(m.x, m.y, 2.2, 0, Math.PI * 2);
-            sctx.fillStyle = `rgba(255,255,255,${m.life})`;
+            sctx.fillStyle = 'rgba(255,255,255,' + m.life + ')';
             sctx.fill();
         }
     }
 
-    /* ================= 极光 ================= */
-    const wavesA = [];
-    for (let i = 0; i < 5; i++) {
+    /* ================================================================
+       极光
+    ================================================================ */
+    var wavesA = [];
+    for (var wi = 0; wi < 5; wi++) {
         wavesA.push({
             amplitude: 40 + Math.random() * 70,
             frequency: 0.0016 + Math.random() * 0.0014,
             speed: 0.15 + Math.random() * 0.3,
             phase: Math.random() * Math.PI * 2,
-            baseY: 0.25 + i * 0.14,
+            baseY: 0.25 + wi * 0.14,
             thickness: 50 + Math.random() * 90,
-            hueBase: 140 + i * 35,
+            hueBase: 140 + wi * 35,
             drift: (Math.random() - 0.5) * 0.02
         });
     }
 
-    let orbs = [];
+    var orbs = [];
     function initOrbs() {
         orbs = [];
-        const count = Math.floor((W * H) / 22000);
-        for (let i = 0; i < count; i++) {
+        var count = Math.min(90, Math.floor((W * H) / 22000));
+        for (var i = 0; i < count; i++) {
             orbs.push({
                 x: Math.random() * W,
                 y: Math.random() * H,
@@ -343,32 +455,33 @@
         }
     }
 
-    function drawAurora(t) {
+    function drawAurora(t, step, dt) {
         actx.fillStyle = '#000000';
         actx.fillRect(0, 0, W, H);
         actx.globalCompositeOperation = 'lighter';
 
-        for (const w of wavesA) {
-            w.phase += w.speed * 0.016;
-            w.baseY += w.drift * 0.016;
+        for (var i = 0; i < wavesA.length; i++) {
+            var w = wavesA[i];
+            w.phase += w.speed * dt;
+            w.baseY += w.drift * dt;
             if (w.baseY < 0.15 || w.baseY > 0.85) w.drift *= -1;
 
-            const yBase = w.baseY * H;
-            const hue = (w.hueBase + Math.sin(t * 0.1) * 20 + 360) % 360;
+            var yBase = w.baseY * H;
+            var hue = (w.hueBase + Math.sin(t * 0.1) * 20 + 360) % 360;
 
             actx.beginPath();
-            for (let x = 0; x <= W; x += 6) {
-                const y = yBase
+            for (var x = 0; x <= W; x += 8) {
+                var y = yBase
                     + Math.sin(x * w.frequency + w.phase) * w.amplitude
                     + Math.sin(x * w.frequency * 2.3 + w.phase * 1.7) * w.amplitude * 0.35;
-                x === 0 ? actx.moveTo(x, y) : actx.lineTo(x, y);
+                if (x === 0) actx.moveTo(x, y); else actx.lineTo(x, y);
             }
 
-            const grad = actx.createLinearGradient(0, yBase - w.amplitude, 0, yBase + w.thickness);
-            grad.addColorStop(0, `hsla(${hue}, 90%, 60%, 0)`);
-            grad.addColorStop(0.4, `hsla(${hue}, 90%, 60%, 0.10)`);
-            grad.addColorStop(0.7, `hsla(${(hue + 30) % 360}, 90%, 55%, 0.05)`);
-            grad.addColorStop(1, `hsla(${hue}, 90%, 60%, 0)`);
+            var grad = actx.createLinearGradient(0, yBase - w.amplitude, 0, yBase + w.thickness);
+            grad.addColorStop(0, 'hsla(' + hue + ', 90%, 60%, 0)');
+            grad.addColorStop(0.4, 'hsla(' + hue + ', 90%, 60%, 0.10)');
+            grad.addColorStop(0.7, 'hsla(' + ((hue + 30) % 360) + ', 90%, 55%, 0.05)');
+            grad.addColorStop(1, 'hsla(' + hue + ', 90%, 60%, 0)');
             actx.lineTo(W, yBase + w.thickness * 2);
             actx.lineTo(0, yBase + w.thickness * 2);
             actx.closePath();
@@ -376,47 +489,51 @@
             actx.fill();
 
             actx.beginPath();
-            for (let x = 0; x <= W; x += 6) {
-                const y = yBase
-                    + Math.sin(x * w.frequency + w.phase) * w.amplitude
-                    + Math.sin(x * w.frequency * 2.3 + w.phase * 1.7) * w.amplitude * 0.35;
-                x === 0 ? actx.moveTo(x, y) : actx.lineTo(x, y);
+            for (var x2 = 0; x2 <= W; x2 += 8) {
+                var y2 = yBase
+                    + Math.sin(x2 * w.frequency + w.phase) * w.amplitude
+                    + Math.sin(x2 * w.frequency * 2.3 + w.phase * 1.7) * w.amplitude * 0.35;
+                if (x2 === 0) actx.moveTo(x2, y2); else actx.lineTo(x2, y2);
             }
-            actx.strokeStyle = `hsla(${hue}, 100%, 75%, 0.35)`;
+            actx.strokeStyle = 'hsla(' + hue + ', 100%, 75%, 0.35)';
             actx.lineWidth = 1.2;
             actx.stroke();
         }
 
-        for (const o of orbs) {
-            o.x += o.vx;
-            o.y += o.vy;
+        for (var j = 0; j < orbs.length; j++) {
+            var o = orbs[j];
+            o.x += o.vx * step;
+            o.y += o.vy * step;
             if (o.y < -10) { o.y = H + 10; o.x = Math.random() * W; }
             if (o.x < -10) o.x = W + 10;
             if (o.x > W + 10) o.x = -10;
 
-            const glow = 0.55 + 0.45 * Math.sin(t * o.pulse + o.phase);
-            const r = o.r * (0.85 + 0.15 * glow);
+            var glow = 0.55 + 0.45 * Math.sin(t * o.pulse + o.phase);
+            var r = o.r * (0.85 + 0.15 * glow);
 
             actx.beginPath();
             actx.arc(o.x, o.y, r, 0, Math.PI * 2);
-            actx.fillStyle = `hsla(${o.hue}, 85%, 70%, ${0.75 * glow + 0.2})`;
+            actx.fillStyle = 'hsla(' + o.hue + ', 85%, 70%, ' + (0.75 * glow + 0.2) + ')';
             actx.fill();
             actx.beginPath();
             actx.arc(o.x - r * 0.25, o.y - r * 0.25, r * 0.45, 0, Math.PI * 2);
-            actx.fillStyle = `hsla(${o.hue}, 60%, 92%, ${0.8 * glow})`;
+            actx.fillStyle = 'hsla(' + o.hue + ', 60%, 92%, ' + (0.8 * glow) + ')';
             actx.fill();
         }
 
         actx.globalCompositeOperation = 'source-over';
     }
 
-    /* ================= 粒子星座 ================= */
-    let nodes = [];
+    /* ================================================================
+       粒子星座
+    ================================================================ */
+    var nodes = [];
+    var LINK_DIST = 130;
 
     function initNetwork() {
         nodes = [];
-        const count = Math.floor((W * H) / 16000);
-        for (let i = 0; i < count; i++) {
+        var count = Math.min(160, Math.floor((W * H) / 16000));
+        for (var i = 0; i < count; i++) {
             nodes.push({
                 x: Math.random() * W,
                 y: Math.random() * H,
@@ -427,23 +544,25 @@
                 phase: Math.random() * Math.PI * 2
             });
         }
+        LINK_DIST = Math.min(W, H) < 480 ? 100 : 130;
     }
 
-    const LINK_DIST = 130;
-
-    function drawNetwork(t) {
+    function drawNetwork(t, step) {
         nctx.fillStyle = '#000000';
         nctx.fillRect(0, 0, W, H);
 
-        for (let i = 0; i < nodes.length; i++) {
-            const a = nodes[i];
-            for (let j = i + 1; j < nodes.length; j++) {
-                const b = nodes[j];
-                const dx = a.x - b.x, dy = a.y - b.y;
-                const dist = Math.hypot(dx, dy);
-                if (dist < LINK_DIST) {
-                    const alpha = (1 - dist / LINK_DIST) * 0.22;
-                    nctx.strokeStyle = `rgba(140, 190, 255, ${alpha})`;
+        var ld2 = LINK_DIST * LINK_DIST;
+
+        for (var i = 0; i < nodes.length; i++) {
+            var a = nodes[i];
+            for (var j = i + 1; j < nodes.length; j++) {
+                var b = nodes[j];
+                var dx = a.x - b.x, dy = a.y - b.y;
+                var d2 = dx * dx + dy * dy;
+                if (d2 < ld2) {
+                    var dist = Math.sqrt(d2);
+                    var alpha = (1 - dist / LINK_DIST) * 0.22;
+                    nctx.strokeStyle = 'rgba(140, 190, 255, ' + alpha + ')';
                     nctx.lineWidth = 0.7;
                     nctx.beginPath();
                     nctx.moveTo(a.x, a.y);
@@ -453,41 +572,46 @@
             }
         }
 
-        for (const n of nodes) {
-            n.x += n.vx;
-            n.y += n.vy;
-            if (n.x < -5) n.x = W + 5; if (n.x > W + 5) n.x = -5;
-            if (n.y < -5) n.y = H + 5; if (n.y > H + 5) n.y = -5;
+        for (var k = 0; k < nodes.length; k++) {
+            var n = nodes[k];
+            n.x += n.vx * step;
+            n.y += n.vy * step;
+            if (n.x < -5) n.x = W + 5;
+            if (n.x > W + 5) n.x = -5;
+            if (n.y < -5) n.y = H + 5;
+            if (n.y > H + 5) n.y = -5;
 
-            const tw = 0.6 + 0.4 * Math.sin(t * 1.2 + n.phase);
+            var tw = 0.6 + 0.4 * Math.sin(t * 1.2 + n.phase);
             nctx.beginPath();
             nctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
             nctx.fillStyle = n.hue !== null
-                ? `hsla(${n.hue}, 85%, 75%, ${tw})`
-                : `rgba(255, 255, 255, ${tw * 0.9})`;
+                ? 'hsla(' + n.hue + ', 85%, 75%, ' + tw + ')'
+                : 'rgba(255,255,255,' + (tw * 0.9) + ')';
             nctx.fill();
         }
     }
 
-    /* ================= 流光 ================= */
-    const ribbons = [];
-    for (let i = 0; i < 6; i++) {
+    /* ================================================================
+       流光
+    ================================================================ */
+    var ribbons = [];
+    for (var ri = 0; ri < 6; ri++) {
         ribbons.push({
             amplitude: 30 + Math.random() * 60,
             frequency: 0.002 + Math.random() * 0.002,
             speed: 0.3 + Math.random() * 0.5,
             phase: Math.random() * Math.PI * 2,
-            baseY: 0.18 + i * 0.12,
+            baseY: 0.18 + ri * 0.12,
             thickness: 90 + Math.random() * 120,
-            hueOffset: i * 55
+            hueOffset: ri * 55
         });
     }
 
-    let glints = [];
+    var glints = [];
     function initGlints() {
         glints = [];
-        const count = Math.floor((W * H) / 26000);
-        for (let i = 0; i < count; i++) {
+        var count = Math.min(120, Math.floor((W * H) / 26000));
+        for (var i = 0; i < count; i++) {
             glints.push({
                 x: Math.random() * W,
                 y: Math.random() * H,
@@ -500,27 +624,28 @@
         }
     }
 
-    function drawWaves(t) {
+    function drawWaves(t, step) {
         wctx.fillStyle = '#000000';
         wctx.fillRect(0, 0, W, H);
         wctx.globalCompositeOperation = 'lighter';
 
-        for (const rb of ribbons) {
-            const yBase = rb.baseY * H;
-            const hue = (t * 14 + rb.hueOffset) % 360;
+        for (var i = 0; i < ribbons.length; i++) {
+            var rb = ribbons[i];
+            var yBase = rb.baseY * H;
+            var hue = (t * 14 + rb.hueOffset) % 360;
 
             wctx.beginPath();
-            for (let x = 0; x <= W; x += 5) {
-                const y = yBase
+            for (var x = 0; x <= W; x += 7) {
+                var y = yBase
                     + Math.sin(x * rb.frequency + rb.phase + t * rb.speed) * rb.amplitude
                     + Math.sin(x * rb.frequency * 2.1 + rb.phase * 1.6 - t * rb.speed * 1.4) * rb.amplitude * 0.4;
-                x === 0 ? wctx.moveTo(x, y) : wctx.lineTo(x, y);
+                if (x === 0) wctx.moveTo(x, y); else wctx.lineTo(x, y);
             }
-            const grad = wctx.createLinearGradient(0, yBase - rb.amplitude, 0, yBase + rb.thickness);
-            grad.addColorStop(0, `hsla(${hue}, 95%, 60%, 0)`);
-            grad.addColorStop(0.5, `hsla(${hue}, 95%, 60%, 0.12)`);
-            grad.addColorStop(0.8, `hsla(${(hue + 40) % 360}, 95%, 55%, 0.06)`);
-            grad.addColorStop(1, `hsla(${hue}, 95%, 60%, 0)`);
+            var grad = wctx.createLinearGradient(0, yBase - rb.amplitude, 0, yBase + rb.thickness);
+            grad.addColorStop(0, 'hsla(' + hue + ', 95%, 60%, 0)');
+            grad.addColorStop(0.5, 'hsla(' + hue + ', 95%, 60%, 0.12)');
+            grad.addColorStop(0.8, 'hsla(' + ((hue + 40) % 360) + ', 95%, 55%, 0.06)');
+            grad.addColorStop(1, 'hsla(' + hue + ', 95%, 60%, 0)');
             wctx.lineTo(W, yBase + rb.thickness * 2);
             wctx.lineTo(0, yBase + rb.thickness * 2);
             wctx.closePath();
@@ -528,38 +653,41 @@
             wctx.fill();
 
             wctx.beginPath();
-            for (let x = 0; x <= W; x += 5) {
-                const y = yBase
-                    + Math.sin(x * rb.frequency + rb.phase + t * rb.speed) * rb.amplitude
-                    + Math.sin(x * rb.frequency * 2.1 + rb.phase * 1.6 - t * rb.speed * 1.4) * rb.amplitude * 0.4;
-                x === 0 ? wctx.moveTo(x, y) : wctx.lineTo(x, y);
+            for (var x2 = 0; x2 <= W; x2 += 7) {
+                var y2 = yBase
+                    + Math.sin(x2 * rb.frequency + rb.phase + t * rb.speed) * rb.amplitude
+                    + Math.sin(x2 * rb.frequency * 2.1 + rb.phase * 1.6 - t * rb.speed * 1.4) * rb.amplitude * 0.4;
+                if (x2 === 0) wctx.moveTo(x2, y2); else wctx.lineTo(x2, y2);
             }
-            wctx.strokeStyle = `hsla(${hue}, 100%, 78%, 0.5)`;
+            wctx.strokeStyle = 'hsla(' + hue + ', 100%, 78%, 0.5)';
             wctx.lineWidth = 1.4;
             wctx.stroke();
         }
 
-        for (const g of glints) {
-            g.x += g.vx;
+        for (var j = 0; j < glints.length; j++) {
+            var g = glints[j];
+            g.x += g.vx * step;
             if (g.x > W + 10) g.x = -10;
-            const alpha = 0.4 + 0.6 * Math.abs(Math.sin(t * g.pulse + g.phase));
+            var alpha = 0.4 + 0.6 * Math.abs(Math.sin(t * g.pulse + g.phase));
             wctx.beginPath();
             wctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
-            wctx.fillStyle = `hsla(${(g.hue + t * 20) % 360}, 90%, 75%, ${alpha})`;
+            wctx.fillStyle = 'hsla(' + ((g.hue + t * 20) % 360) + ', 90%, 75%, ' + alpha + ')';
             wctx.fill();
         }
 
         wctx.globalCompositeOperation = 'source-over';
     }
 
-    /* ================= 飘雪 ================= */
-    let flakes = [];
+    /* ================================================================
+       飘雪
+    ================================================================ */
+    var flakes = [];
 
     function initSnow() {
         flakes = [];
-        const count = Math.floor((W * H) / 4200);
-        for (let i = 0; i < count; i++) {
-            const layer = Math.floor(Math.random() * 3) + 1;
+        var count = Math.min(320, Math.floor((W * H) / 4200));
+        for (var i = 0; i < count; i++) {
+            var layer = Math.floor(Math.random() * 3) + 1;
             flakes.push({
                 x: Math.random() * W,
                 y: Math.random() * H,
@@ -574,27 +702,25 @@
         }
     }
 
-    function drawSnow(t) {
+    function drawSnow(t, step) {
         snctx.fillStyle = '#000000';
         snctx.fillRect(0, 0, W, H);
 
-        for (const f of flakes) {
-            f.y += f.vy;
-            f.x += Math.sin(t * f.swayFreq + f.phase) * f.swayAmp * 0.4;
-            if (f.y > H + 6) {
-                f.y = -6;
-                f.x = Math.random() * W;
-            }
+        for (var i = 0; i < flakes.length; i++) {
+            var f = flakes[i];
+            f.y += f.vy * step;
+            f.x += Math.sin(t * f.swayFreq + f.phase) * f.swayAmp * 0.4 * step;
+            if (f.y > H + 6) { f.y = -6; f.x = Math.random() * W; }
             if (f.x < -6) f.x = W + 6;
             if (f.x > W + 6) f.x = -6;
 
             snctx.beginPath();
             snctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-            snctx.fillStyle = `rgba(255, 255, 255, ${f.alpha})`;
+            snctx.fillStyle = 'rgba(255,255,255,' + f.alpha + ')';
             snctx.fill();
 
             if (f.layer === 3) {
-                snctx.strokeStyle = `rgba(255, 255, 255, ${f.alpha * 0.35})`;
+                snctx.strokeStyle = 'rgba(255,255,255,' + (f.alpha * 0.35) + ')';
                 snctx.lineWidth = 0.6;
                 snctx.beginPath();
                 snctx.moveTo(f.x - f.r * 2, f.y);
@@ -606,19 +732,19 @@
         }
     }
 
-    /* ================= 气泡 ================= */
-    let bubbles = [];
+    /* ================================================================
+       气泡
+    ================================================================ */
+    var bubbles = [];
 
     function initBubbles() {
         bubbles = [];
-        const count = Math.floor((W * H) / 18000);
-        for (let i = 0; i < count; i++) {
-            bubbles.push(newBubble(true));
-        }
+        var count = Math.min(140, Math.floor((W * H) / 18000));
+        for (var i = 0; i < count; i++) bubbles.push(newBubble(true));
     }
 
     function newBubble(anywhere) {
-        const r = 3 + Math.random() * 16;
+        var r = 3 + Math.random() * 16;
         return {
             x: Math.random() * W,
             y: anywhere ? Math.random() * H : H + r + 10,
@@ -632,81 +758,191 @@
         };
     }
 
-    function drawBubbles(t) {
+    function drawBubbles(t, step) {
         bctx.fillStyle = '#000000';
         bctx.fillRect(0, 0, W, H);
 
-        for (const b of bubbles) {
-            b.y -= b.vy;
-            b.x += Math.sin(t * b.wobbleFreq + b.phase) * b.wobbleAmp * 0.5;
+        for (var i = 0; i < bubbles.length; i++) {
+            var b = bubbles[i];
+            b.y -= b.vy * step;
+            b.x += Math.sin(t * b.wobbleFreq + b.phase) * b.wobbleAmp * 0.5 * step;
             if (b.y < -b.r - 12) Object.assign(b, newBubble(false));
 
             bctx.beginPath();
             bctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-            bctx.fillStyle = `hsla(${b.hue}, 70%, 60%, ${b.alpha})`;
+            bctx.fillStyle = 'hsla(' + b.hue + ', 70%, 60%, ' + b.alpha + ')';
             bctx.fill();
 
             bctx.beginPath();
             bctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-            bctx.strokeStyle = `hsla(${b.hue}, 80%, 75%, ${b.alpha * 1.6})`;
+            bctx.strokeStyle = 'hsla(' + b.hue + ', 80%, 75%, ' + (b.alpha * 1.6) + ')';
             bctx.lineWidth = 0.8;
             bctx.stroke();
 
             bctx.beginPath();
             bctx.arc(b.x - b.r * 0.35, b.y - b.r * 0.38, b.r * 0.28, 0, Math.PI * 2);
-            bctx.fillStyle = `rgba(255, 255, 255, ${b.alpha * 2.2})`;
+            bctx.fillStyle = 'rgba(255,255,255,' + (b.alpha * 2.2) + ')';
             bctx.fill();
 
             bctx.beginPath();
             bctx.arc(b.x + b.r * 0.3, b.y + b.r * 0.42, b.r * 0.14, 0, Math.PI * 2);
-            bctx.fillStyle = `rgba(255, 255, 255, ${b.alpha * 1.4})`;
+            bctx.fillStyle = 'rgba(255,255,255,' + (b.alpha * 1.4) + ')';
             bctx.fill();
         }
     }
 
-    /* ================= 时钟 ================= */
-    const timeEl = document.getElementById('time');
-    const dateEl = document.getElementById('date');
-    const week = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    /* ================================================================
+       萤火
+    ================================================================ */
+    var fireflies = [];
+    var glowSprites = {};
 
-    let timeOffset = 0;
+    function makeGlowSprite(hue) {
+        var size = 64;
+        var c = document.createElement('canvas');
+        c.width = size;
+        c.height = size;
+        var g = c.getContext('2d');
+        var grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+        grad.addColorStop(0.00, 'hsla(' + hue + ', 100%, 96%, 1)');
+        grad.addColorStop(0.14, 'hsla(' + hue + ', 100%, 82%, 0.88)');
+        grad.addColorStop(0.34, 'hsla(' + hue + ', 95%, 65%, 0.34)');
+        grad.addColorStop(0.62, 'hsla(' + hue + ', 92%, 58%, 0.11)');
+        grad.addColorStop(1.00, 'hsla(' + hue + ', 90%, 55%, 0)');
+        g.fillStyle = grad;
+        g.fillRect(0, 0, size, size);
+        return c;
+    }
 
-    async function syncNetworkTime() {
-        const apis = [
-            async () => {
-                const r = await fetch('https://worldtimeapi.org/api/timezone/Asia/Shanghai', { cache: 'no-store' });
-                if (!r.ok) throw 0;
-                const j = await r.json();
-                return j.unixtime * 1000;
+    function getGlowSprite(hue) {
+        var key = Math.round(hue / 12) * 12;
+        if (!glowSprites[key]) glowSprites[key] = makeGlowSprite(key);
+        return glowSprites[key];
+    }
+
+    function newFirefly(anywhere) {
+        var r = 1.8 + Math.random() * 2.8;
+        var isWarm = Math.random() < 0.75;
+        return {
+            x: Math.random() * W,
+            y: anywhere ? Math.random() * H : Math.random() * H,
+            r: r,
+            angle: Math.random() * Math.PI * 2,
+            speed: 0.18 + Math.random() * 0.55,
+            turn: (Math.random() - 0.5) * 0.05,
+            glowScale: 3.0 + Math.random() * 3.0,
+            pulseSpeed: 0.5 + Math.random() * 1.7,
+            phase: Math.random() * Math.PI * 2,
+            hue: isWarm ? (48 + Math.random() * 40) : (168 + Math.random() * 130)
+        };
+    }
+
+    function initFireflies() {
+        fireflies = [];
+        var count = Math.min(70, Math.max(10, Math.floor((W * H) / 20000)));
+        for (var i = 0; i < count; i++) fireflies.push(newFirefly(true));
+    }
+
+    function drawFireflies(t, step) {
+        // 拖尾：半透明黑覆盖，形成余辉
+        fctx.globalCompositeOperation = 'source-over';
+        fctx.globalAlpha = 1;
+        fctx.fillStyle = 'rgba(0, 0, 0, 0.17)';
+        fctx.fillRect(0, 0, W, H);
+
+        fctx.globalCompositeOperation = 'lighter';
+
+        var marginX = W * 0.05;
+        var marginY = H * 0.05;
+
+        for (var i = 0; i < fireflies.length; i++) {
+            var f = fireflies[i];
+
+            f.angle += (f.turn + (Math.random() - 0.5) * 0.06) * step;
+            if (f.x < marginX) f.angle += 0.03 * step;
+            if (f.x > W - marginX) f.angle -= 0.03 * step;
+            if (f.y < marginY) f.angle += 0.03 * step;
+            if (f.y > H - marginY) f.angle -= 0.03 * step;
+
+            f.x += Math.cos(f.angle) * f.speed * step;
+            f.y += Math.sin(f.angle) * f.speed * step;
+
+            if (f.x < -50) f.x = W + 50;
+            if (f.x > W + 50) f.x = -50;
+            if (f.y < -50) f.y = H + 50;
+            if (f.y > H + 50) f.y = -50;
+
+            var pulse = 0.30 + 0.70 * (0.5 + 0.5 * Math.sin(t * f.pulseSpeed + f.phase));
+            var R = f.r * f.glowScale * (0.75 + 0.45 * pulse);
+            var sprite = getGlowSprite(f.hue);
+
+            fctx.globalAlpha = pulse * 0.9;
+            fctx.drawImage(sprite, f.x - R, f.y - R, R * 2, R * 2);
+
+            fctx.globalAlpha = pulse;
+            fctx.beginPath();
+            fctx.arc(f.x, f.y, f.r * 0.55, 0, Math.PI * 2);
+            fctx.fillStyle = 'hsla(' + f.hue + ', 100%, 90%, 1)';
+            fctx.fill();
+        }
+
+        fctx.globalAlpha = 1;
+        fctx.globalCompositeOperation = 'source-over';
+    }
+
+    /* ================================================================
+       时钟
+    ================================================================ */
+    var timeEl = document.getElementById('time');
+    var dateEl = document.getElementById('date');
+    var week = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+    var timeOffset = 0;
+
+    function syncNetworkTime() {
+        var apis = [
+            function () {
+                return fetch('https://worldtimeapi.org/api/timezone/Asia/Shanghai', { cache: 'no-store' })
+                    .then(function (r) {
+                        if (!r.ok) throw 0;
+                        return r.json();
+                    })
+                    .then(function (j) { return j.unixtime * 1000; });
             },
-            async () => {
-                const r = await fetch('https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5', { cache: 'no-store' });
-                const d = Date.parse(r.headers.get('Date'));
-                if (isNaN(d)) throw 0;
-                return d;
+            function () {
+                return fetch('https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5', { cache: 'no-store' })
+                    .then(function (r) {
+                        var d = Date.parse(r.headers.get('Date'));
+                        if (isNaN(d)) throw 0;
+                        return d;
+                    });
             }
         ];
-        for (const api of apis) {
-            try {
-                const start = Date.now();
-                const netMs = await api();
-                const rtt = Date.now() - start;
+        function tryApi(i) {
+            if (i >= apis.length) return;
+            var start = Date.now();
+            apis[i]().then(function (netMs) {
+                var rtt = Date.now() - start;
                 timeOffset = netMs + rtt / 2 - Date.now();
-                return;
-            } catch (e) { }
+            }, function () {
+                tryApi(i + 1);
+            });
         }
+        tryApi(0);
     }
 
     function now() {
         return new Date(Date.now() + timeOffset);
     }
 
+    function pad(n) { return String(n).padStart(2, '0'); }
+
     function tick() {
-        const d = now();
-        const p = n => String(n).padStart(2, '0');
-        timeEl.textContent = `${p(d.getHours())}:${p(d.getMinutes())}`;
+        var d = now();
+        timeEl.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
         dateEl.textContent =
-            `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())}  ${week[d.getDay()]}`;
+            d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate()) +
+            '  ' + week[d.getDay()];
     }
 
     tick();
@@ -714,23 +950,28 @@
     syncNetworkTime();
     setInterval(syncNetworkTime, 10 * 60 * 1000);
 
-    /* ================= 模式切换 ================= */
+    /* ================================================================
+       模式切换
+    ================================================================ */
     function applyMode() {
-        for (const m of MODES) {
+        for (var i = 0; i < MODES.length; i++) {
+            var m = MODES[i];
             canvases[m].style.display = (m === mode) ? 'block' : 'none';
         }
         coreEl.style.display = (mode === 'aurora') ? 'block' : 'none';
-        dots.forEach(d => d.classList.toggle('active', d.dataset.mode === mode));
+        for (var j = 0; j < items.length; j++) {
+            items[j].classList.toggle('active', items[j].dataset.mode === mode);
+        }
     }
 
     function toggleMode() {
-        const i = MODES.indexOf(mode);
+        var i = MODES.indexOf(mode);
         mode = MODES[(i + 1) % MODES.length];
         applyMode();
     }
 
-    const AUTO_INTERVAL = 5 * 60 * 1000;
-    let autoTimer = setInterval(toggleMode, AUTO_INTERVAL);
+    var AUTO_INTERVAL = 5 * 60 * 1000; // 每个模块显示 5 分钟
+    var autoTimer = setInterval(toggleMode, AUTO_INTERVAL);
 
     function manualSwitch() {
         toggleMode();
@@ -738,8 +979,34 @@
         autoTimer = setInterval(toggleMode, AUTO_INTERVAL);
     }
 
-    switcher.addEventListener('click', manualSwitch);
-    window.addEventListener('keydown', e => {
+    // 点击切换条空白处：切到下一个模式
+    switcher.addEventListener('click', function (e) {
+        e.preventDefault();
+        manualSwitch();
+        showSwitcher();
+    });
+
+    // 点击具体模式：直接切换（不参与自动循环的“其它”除外）
+    for (var ii = 0; ii < items.length; ii++) {
+        items[ii].addEventListener('click', function (e) {
+            e.stopPropagation();
+            var target = this.dataset.mode;
+            if (target && target !== mode) {
+                mode = target;
+                applyMode();
+            }
+            clearInterval(autoTimer);
+            autoTimer = setInterval(toggleMode, AUTO_INTERVAL);
+            showSwitcher();
+        });
+    }
+
+    // “其它”按钮：继承萤火格式，点击跳转，不切换模式
+    otherItem.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
+
+    window.addEventListener('keydown', function (e) {
         if (e.code === 'Space' || e.code === 'KeyS') {
             e.preventDefault();
             manualSwitch();
@@ -747,57 +1014,142 @@
         }
     });
 
-    const otherBtn = document.getElementById('otherBtn');
+    /* 控件显示 / 隐藏 */
+    var hideTimer = null;
+    var IS_TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    var HIDE_DELAY = IS_TOUCH ? 4500 : 3000;
 
-    let hideTimer = null;
     function showSwitcher() {
         switcher.classList.add('visible');
-        otherBtn.classList.add('visible');
         clearTimeout(hideTimer);
-        hideTimer = setTimeout(() => {
+        hideTimer = setTimeout(function () {
             switcher.classList.remove('visible');
-            otherBtn.classList.remove('visible');
-        }, 3000);
+        }, HIDE_DELAY);
     }
-    window.addEventListener('mousemove', showSwitcher);
+    window.addEventListener('mousemove', showSwitcher, { passive: true });
     window.addEventListener('touchstart', showSwitcher, { passive: true });
+    window.addEventListener('pointerdown', showSwitcher, { passive: true });
 
-    /* ================= 主循环 ================= */
+    /* 阻止双击缩放 / 长按菜单（微信内尤为需要） */
+    var lastTouchEnd = 0;
+    document.addEventListener('touchend', function (e) {
+        var nowTs = Date.now();
+        if (nowTs - lastTouchEnd <= 300) e.preventDefault();
+        lastTouchEnd = nowTs;
+    }, { passive: false });
+
+    document.addEventListener('gesturestart', function (e) { e.preventDefault(); }, { passive: false });
+
+    /* ================================================================
+       尺寸 / DPR
+    ================================================================ */
     function resize() {
-        W = window.innerWidth;
-        H = window.innerHeight;
-        for (const m of MODES) {
-            canvases[m].width = W;
-            canvases[m].height = H;
+        var nw = window.innerWidth || document.documentElement.clientWidth;
+        var nh = window.innerHeight || document.documentElement.clientHeight;
+
+        W = nw;
+        H = nh;
+        DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+        for (var i = 0; i < MODES.length; i++) {
+            var cv = canvases[MODES[i]];
+            var cw = Math.round(W * DPR);
+            var ch = Math.round(H * DPR);
+            if (cv.width !== cw) cv.width = cw;
+            if (cv.height !== ch) cv.height = ch;
+            cv.style.width = W + 'px';
+            cv.style.height = H + 'px';
+            cv.getContext('2d').setTransform(DPR, 0, 0, DPR, 0, 0);
         }
+
         initStars();
         initOrbs();
         initNetwork();
         initGlints();
         initSnow();
         initBubbles();
+        initFireflies();
     }
-    window.addEventListener('resize', resize);
 
-    let t = 0;
-    function loop() {
-        t += 0.016;
+    var resizeRaf = null;
+    function onResize() {
+        if (resizeRaf) cancelAnimationFrame(resizeRaf);
+        resizeRaf = requestAnimationFrame(function () {
+            resizeRaf = null;
+            var nw = window.innerWidth || document.documentElement.clientWidth;
+            var nh = window.innerHeight || document.documentElement.clientHeight;
+            if (Math.abs(nw - W) < 2 && Math.abs(nh - H) < 2) return;
+            resize();
+        });
+    }
+
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', function () {
+        setTimeout(resize, 260);
+    });
+
+    /* ================================================================
+       主循环
+    ================================================================ */
+    var t = 0;
+    var lastTs = 0;
+    var rafId = null;
+
+    function frame(ts) {
+        if (!lastTs) lastTs = ts;
+        var dt = (ts - lastTs) / 1000;
+        lastTs = ts;
+
+        if (dt > 0.05) dt = 0.05;
+        if (dt < 0) dt = 0;
+
+        var step = dt * 60;
+        t += dt;
+
         switch (mode) {
-            case 'starfield': drawStars(t); break;
-            case 'aurora': drawAurora(t); break;
-            case 'network': drawNetwork(t); break;
-            case 'waves': drawWaves(t); break;
-            case 'snow': drawSnow(t); break;
-            case 'bubbles': drawBubbles(t); break;
+            case 'starfield': drawStars(t, step); break;
+            case 'aurora':    drawAurora(t, step, dt); break;
+            case 'network':   drawNetwork(t, step); break;
+            case 'waves':     drawWaves(t, step); break;
+            case 'snow':      drawSnow(t, step); break;
+            case 'bubbles':   drawBubbles(t, step); break;
+            case 'fireflies': drawFireflies(t, step); break;
         }
-        requestAnimationFrame(loop);
+
+        rafId = requestAnimationFrame(frame);
     }
 
+    function start() {
+        if (rafId === null) {
+            lastTs = 0;
+            rafId = requestAnimationFrame(frame);
+        }
+    }
+
+    function stop() {
+        if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }
+    }
+
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) stop();
+        else start();
+    });
+
+    window.addEventListener('pagehide', stop);
+    window.addEventListener('pageshow', start);
+
+    /* ================================================================
+       启动
+    ================================================================ */
     resize();
     applyMode();
     showSwitcher();
-    loop();
+    start();
     setTimeout(spawnMeteor, 1500);
+
 })();
 </script>
 </body>
