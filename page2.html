@@ -87,17 +87,20 @@
     text-shadow: 0 0 18px rgba(140, 190, 255, 0.28);
   }
 
-  /* ============ 右下角模块切换按钮 ============
+  /* ============ 底部居中模块切换按钮 ============
      采用 grid 布局：
        · 默认一行 10 列（每列 max-content）
        · 宽度不够时由 JS 切成两排，每排 5 个
+       · left:50% + translateX(-50%) 实现水平居中
      ============================================ */
   .switcher {
     position: fixed;
-    right: 20px; bottom: 20px;
+    left: 50%;
+    bottom: 20px;
     display: grid;
     grid-template-columns: repeat(10, max-content);
     grid-auto-rows: auto;
+    justify-content: center;
     gap: 6px;
     padding: 6px;
     width: max-content;
@@ -109,14 +112,14 @@
     -webkit-backdrop-filter: blur(14px) saturate(140%);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.50);
     opacity: 0;
-    transform: translateY(10px) scale(.96);
+    transform: translate(-50%, 10px) scale(.96);
     transition: opacity .45s ease, transform .45s ease, border-radius .3s ease;
     pointer-events: none;
     z-index: 10;
   }
   body.ui-visible .switcher {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate(-50%, 0) scale(1);
     pointer-events: auto;
   }
   /* 两排模式（由 JS 自动加上） */
@@ -150,7 +153,8 @@
 
   @media (max-width: 560px) {
     .switcher {
-      right: 12px; bottom: 12px;
+      left: 50%;
+      bottom: 12px;
       padding: 5px;
       gap: 4px;
       max-width: calc(100vw - 24px);
@@ -3027,6 +3031,7 @@ function createDesert(canvas) {
      按钮自适应布局：
        · 先按「一行 N 个」测量总宽度
        · 若超出可视宽度，自动切为「两排，每排 ceil(N/2) 个」
+       · 容器整体通过 left:50% + translateX(-50%) 水平居中
      ======================================================= */
   function layoutSwitcher() {
     const vw = window.innerWidth || document.documentElement.clientWidth;
@@ -3073,7 +3078,6 @@ function createDesert(canvas) {
     if (now >= nextSwitchAt) {
       goNext();
       nextSwitchAt += AUTO_MS;
-      // 若因后台节流导致严重滞后，则重新对齐
       if (nextSwitchAt <= now) nextSwitchAt = now + AUTO_MS;
     }
   }
